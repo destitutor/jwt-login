@@ -43,8 +43,9 @@ public class RefreshTokenService {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             byte[] hash = md.digest(token.getBytes(StandardCharsets.UTF_8));
             return Base64.getEncoder().encodeToString(hash);
-        } catch (NoSuchAlgorithmException e) {
-            throw new InvalidValueException(ErrorCode.TOKEN_HASHING_ERROR);
+        } catch (NoSuchAlgorithmException ignored) {
+            /* SHA-256 is always available */
+            return "";
         }
     }
 }
