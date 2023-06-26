@@ -1,13 +1,17 @@
+이 리포지토리는 JWT에 대한 개인적인 공부를 위해 사용하고 있습니다. 주로 JWT에 대해 공부한 내용이나 코드를 정리해서 올리고 있습니다.
+
 # Table of Contents
 - [정의](#정의)
 - [작업 흐름](#작업-흐름)
 - [토큰 탈취에 대한 대응 방안](#토큰-탈취에-대한-대응-방안)
   * [Access + Refresh Token을 이용한 인증](#access--refresh-token을-이용한-인증)
+  * [RTR(Refresh Token Rotation)](#rtrrefresh-token-rotation)
 - [스프링 부트 시큐리티](#스프링-부트-시큐리티)
   * [의존성 추가](#의존성-추가)
     + [Gradle](#gradle)
   * [시큐리티 설정](#시큐리티-설정)
-
+- [참고](#참고)
+ 
 # 정의
 토큰 기반 인증 시스템은 로그인 시 토큰을 발급해주고, 서버에 요청을 할 때 HTTP 헤더에 토큰을 함께 보내도록 하여 유효성 검사를 하는 방식이다. 사용자의 인증 정보를 더 이상 서버에 저장하지 않고 클라이언트의 요청으로만 인가(authorization)를 처리할 수 있으므로 무상태(stateless) 구조를 가진다.
 
@@ -49,6 +53,21 @@ JWT는 JSON Web Token의 약자로, 인증에 필요한 정보를 암호화 시�
 13. 서버는 받은 `Access Token`이 조작되지 않았는지 확인한 후, HTTP 요청 헤더의 `Refresh Token`과 사용자의 DB에 저장되어 있던 `Refresh Token`을 비교한다. `Refresh Token`이 동일하고 유효기간도 지나지 않았다면 새로운 `Access Token`을 발급해준다.
 14. 서버는 새로운 `Access Token`을 HTTP 응답 헤더에 실어 다시 API 요청을 진행한다.
 
+## RTR(Refresh Token Rotation)
+웹 애플리케이션은 네이티브 애플리케이션보다 쉽게 위협에 노출될 수 있기 때문에, Refresh Token에 대한 추가적인 보호가 필요하다. 구체적으로 말하면, 브라우저에 노출되는 리프레시 토큰은 `RTR(Refresh Token Rotation)`을 통해 보호되어야 한다.
+
+`Refresh Token Rotation`은 간단히 말해서 `Refresh Token`을 한 번만 사용할 수 있도록 만드는 것이다. 리프레시 토큰이 사용될 때마다, 보안 토큰 서비스는 새로운 `Access Token`과 `Refresh Token`을 발급한다.
+
+![Attachments_JWT_P03](https://github.com/destitutor/jwt-login/assets/75304316/e51b0bcd-8747-4ba7-8605-1e88e8d6461e)
+
+하지만 단순히 리프레시 토큰을 발급하는 것만으로는 추가적인 보호를 제공하진 않는다. 그래서 RTR의 두 번째 측면이 매우 중요한데, 보안 토큰 서비스(STS)는 리프레시 토큰이 두 번 이상 사용되는 것을 감지하면 문제가 있다고 판단하기 때문이다. 그럼 리프레시 토큰은 즉시 폐기되어야 하고, 그와 관련된 모든 토큰도 같이 폐기되어야 한다.
+
+![Attachments_JWT_P04](https://github.com/destitutor/jwt-login/assets/75304316/4c303f7e-c20f-4057-8072-a12233f12339)
+
+공격자가 앱보다 먼저 훔친 토큰을 사용하는 경우를 방지하기 위해서, 모든 관련 토큰을 폐기하는 것이 중요하다.
+
+![Attachments_JWT_P05](https://github.com/destitutor/jwt-login/assets/75304316/484eb100-9dcf-471d-be17-d8767b8fa102)
+
 # 스프링 부트 시큐리티
 ## 의존성 추가
 ### Gradle
@@ -66,3 +85,6 @@ runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 - JWT 토큰 필터를 추가한다.
 
 > 일반 사용자가 브라우저를 통해 처리할 수 있는 모든 요청에 대해서 CSRF 보호를 사용하는 것이 좋다. 브라우저가 아닌 클라이언트에서 사용하는 서비스만 만드는 경우 CSRF 보호를 사용하지 않도록 설정할 수 있다.
+
+# 참고
+1. [An in-depth look at refresh tokens in the browser](https://pragmaticwebsecurity.com/articles/oauthoidc/refresh-token-protection-implications.html)
