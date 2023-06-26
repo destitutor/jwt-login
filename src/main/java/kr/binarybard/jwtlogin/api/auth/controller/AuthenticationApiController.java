@@ -28,7 +28,7 @@ public class AuthenticationApiController {
         return ResponseEntity.ok().body(loginService.authenticateUser(request));
     }
 
-    @PostMapping("/reissue")
+    @PostMapping("/refresh")
     public ResponseEntity<TokenResponse> reissue(@Valid @RequestBody RefreshTokenRequest request) {
         return ResponseEntity.ok().body(loginService.refreshJwtTokens(request));
     }

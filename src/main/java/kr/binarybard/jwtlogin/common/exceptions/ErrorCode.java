@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum ErrorCode {
 
-    DUPLICATED_EMAIL(HttpStatus.BAD_REQUEST, "AU_001", "이미 사용중인 이메일입니다."),
+    DUPLICATED_EMAIL(HttpStatus.CONFLICT, "AU_001", "이미 사용중인 이메일입니다."),
     AUTHENTICATION_FAILED(HttpStatus.UNAUTHORIZED, "AU_002", "이메일 또는 비밀번호가 일치하지 않습니다."),
 
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "M_001", "회원을 찾을 수 없습니다."),
