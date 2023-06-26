@@ -1,7 +1,6 @@
 package kr.binarybard.jwtlogin.api.auth.controller;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.security.auth.message.AuthException;
 import jakarta.validation.Valid;
 import kr.binarybard.jwtlogin.api.auth.dto.RefreshTokenRequest;
 import kr.binarybard.jwtlogin.api.auth.dto.SignInRequest;
@@ -35,23 +34,19 @@ public class AuthenticationApiController {
 
     @PostMapping("/login")
     public ResponseEntity<JwtTokens> authorize(@Valid @RequestBody SignInRequest request) {
-        var authentication = authenticate(request.getEmail(), request.getPassword());
+        var authenticationToken = new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
+        var authentication = authenticationManagerBuilder.getObject()
+                .authenticate(authenticationToken);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
         return ResponseEntity.ok().body(generateJwtTokens(request.getEmail(), authentication));
     }
 
     @PostMapping("/reissue")
     public ResponseEntity<JwtTokens> reissue(@Valid @RequestBody RefreshTokenRequest request) {
         String currentRefreshToken = request.getRefreshToken();
-
         validateRefreshToken(currentRefreshToken);
-
-        String username = tokenProvider.getUsernameFromToken(currentRefreshToken);
-
-        var userDetails = memberService.loadUserByUsername(username);
-        var authentication = new UsernamePasswordAuthenticationToken(
-                userDetails, null, userDetails.getAuthorities());
-
-        return ResponseEntity.ok().body(generateJwtTokens(username, authentication));
+        var authentication = tokenProvider.getAuthentication(currentRefreshToken);
+        return ResponseEntity.ok().body(generateJwtTokens(authentication.getName(), authentication));
     }
 
     @PostMapping("/signup")
@@ -65,14 +60,6 @@ public class AuthenticationApiController {
         String refreshToken = createAndSaveRefreshToken(username, authentication);
 
         return new JwtTokens(accessToken, refreshToken);
-    }
-
-    private Authentication authenticate(String email, String password) {
-        var authenticationToken = new UsernamePasswordAuthenticationToken(email, password);
-        var authentication = authenticationManagerBuilder.getObject()
-                .authenticate(authenticationToken);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        return authentication;
     }
 
     private String createAndSaveRefreshToken(String email, Authentication authentication) {
