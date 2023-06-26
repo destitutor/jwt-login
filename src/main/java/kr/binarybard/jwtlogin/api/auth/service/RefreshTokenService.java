@@ -20,7 +20,6 @@ public class RefreshTokenService {
     private final RedisTemplate<String, String> redisTemplate;
     private final JwtTokenProvider tokenProvider;
 
-    @Transactional
     public void deleteTokenByEmail(String email) {
         redisTemplate.delete(email);
     }
