@@ -1,8 +1,14 @@
- 이 리포지토리는 JWT에 대한 개인적인 공부를 위해 사용하고 있습니다. 주로 JWT에 대해 공부한 내용이나 코드를 정리해서 올리고 있습니다.
+이 리포지토리는 JWT에 대한 개인적인 공부를 위해 사용하고 있습니다. 주로 JWT에 대해 공부한 내용이나 코드를 정리해서 올리고 있습니다.
 
 # Table of Contents
 - [정의](#정의)
 - [작업 흐름](#작업-흐름)
+- [구조](#구조)
+  * [헤더(Header)](#헤더header)
+  * [페이로드(Payload)](#페이로드payload)
+    + [표준 스펙](#표준-스펙)
+  * [서명(Signature)](#서명signature)
+- [암호화 과정 대략적으로 살펴보기](#암호화-과정-대략적으로-살펴보기)
 - [토큰 탈취에 대한 대응 방안](#토큰-탈취에-대한-대응-방안)
   * [Access + Refresh Token을 이용한 인증](#access--refresh-token을-이용한-인증)
   * [RTR(Refresh Token Rotation)](#rtrrefresh-token-rotation)
@@ -78,11 +84,11 @@ HMACSHA256 {
 >
 >따라서 URL 안전한 버전인 Base64url이 제안된 것이다. Base64url은 '+', '/', '=' 문자 대신에 각각 '-', '\_', '' 문자를 사용해서 인코딩을 수행한다.
 
-![Attachments_JWT_P06](https://github.com/destitutor/jwt-login/assets/75304316/da114c37-7e1f-4fc9-8f8b-51120d42d550)
+<p align="center"><img src="https://github.com/destitutor/jwt-login/assets/75304316/da114c37-7e1f-4fc9-8f8b-51120d42d550" width="50%"></p>
 
 시그니처(signature, 혹은 HMAC 태그)는 비밀 키(secret key)와 메시지(base64로 인코딩된 헤더와 페이로드)를 혼합하여 그 결과를 해시 함수를 통해 해싱한 다음 URL 안전한 base64로 인코딩되어 JWT의 마지막 섹션을 차지하게 된다.
 
-![Attachments_JWT_P07](https://github.com/destitutor/jwt-login/assets/75304316/d2d99b6e-c401-40b7-811c-a1d7d04fc45d)
+<p align="center"><img src="https://github.com/destitutor/jwt-login/assets/75304316/d2d99b6e-c401-40b7-811c-a1d7d04fc45d" width="50%"></p>
 
 이를 친숙한 자바 코드로 나타내면 다음과 같다.
 
